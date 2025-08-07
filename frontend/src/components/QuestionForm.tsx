@@ -12,6 +12,14 @@ const QuestionForm = ({ question, index, onChange, onRemove }: Props) => {
     onChange(index, { ...question, [field]: value })
   }
 
+  const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newType = e.target.value as QuestionType;
+    let newCorrectAnswer: string | boolean | string[] = '';
+    if (newType === 'boolean') newCorrectAnswer = false;
+    else if (newType === 'checkbox') newCorrectAnswer = [];
+    onChange(index, { ...question, type: newType, correctAnswer: newCorrectAnswer });
+  }
+
   return (
     <div className="mb-4">
       <input
@@ -24,7 +32,7 @@ const QuestionForm = ({ question, index, onChange, onRemove }: Props) => {
       <select
         className="w-full p-2 border mb-2"
         value={question.type}
-        onChange={e => handleField('type', e.target.value as QuestionType)}
+        onChange={handleTypeChange}
       >
         <option value="boolean">Boolean</option>
         <option value="input">Input</option>
