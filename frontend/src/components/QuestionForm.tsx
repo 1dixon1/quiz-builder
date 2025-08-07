@@ -1,64 +1,79 @@
-import { useForm, useFieldArray } from 'react-hook-form';
+import type { Question, QuestionType } from '../../types'
 
-export const defaultQuestion = {
-  text: '',
-  type: 'boolean',
-  options: [],
-  correctAnswer: '',
-};
+interface Props {
+  question: Question
+  index: number
+  onChange: (index: number, updated: Question) => void
+  onRemove: (index: number) => void
+}
 
-export const QuestionForm = ({ register, control, index, remove, watch }: any) => {
-  const type = watch(`questions.${index}.type`);
+const QuestionForm = ({ question, index, onChange, onRemove }: Props) => {
+  const handleField = (field: keyof Question, value: string | boolean | string[]) => {
+    onChange(index, { ...question, [field]: value })
+  }
 
   return (
-    <div className="border p-4 my-2 bg-white rounded shadow">
+    <div className="mb-4">
       <input
-        {...register(`questions.${index}.text`, { required: true })}
+        type="text"
+        className="w-full p-2 border mb-2"
         placeholder="Question text"
-        className="w-full border px-2 py-1 mb-2"
+        value={question.text}
+        onChange={e => handleField('text', e.target.value)}
       />
-      <select {...register(`questions.${index}.type`)} className="w-full mb-2">
+      <select
+        className="w-full p-2 border mb-2"
+        value={question.type}
+        onChange={e => handleField('type', e.target.value as QuestionType)}
+      >
         <option value="boolean">Boolean</option>
         <option value="input">Input</option>
         <option value="checkbox">Checkbox</option>
       </select>
 
-      {type === 'checkbox' && (
+      {question.type === 'checkbox' && (
         <>
-          {[0, 1, 2].map((i) => (
-            <input
-              key={i}
-              {...register(`questions.${index}.options.${i}`)}
-              placeholder={`Option ${i + 1}`}
-              className="w-full mb-1 border px-2 py-1"
-            />
-          ))}
           <input
-            {...register(`questions.${index}.correctAnswer`)}
-            placeholder="Correct options (comma-separated)"
-            className="w-full border px-2 py-1"
+            type="text"
+            className="w-full p-2 border mb-2"
+            placeholder="Comma-separated options"
+            onChange={e => handleField('options', e.target.value.split(','))}
+          />
+          <input
+            type="text"
+            className="w-full p-2 border mb-2"
+            placeholder="Comma-separated correct answers"
+            onChange={e => handleField('correctAnswer', e.target.value.split(','))}
           />
         </>
       )}
 
-      {type === 'boolean' && (
-        <select {...register(`questions.${index}.correctAnswer`)} className="w-full">
+      {question.type === 'boolean' && (
+        <select
+          className="w-full p-2 border"
+          value={String(question.correctAnswer)}
+          onChange={e => handleField('correctAnswer', e.target.value === 'true')}
+        >
           <option value="true">True</option>
           <option value="false">False</option>
         </select>
       )}
 
-      {type === 'input' && (
+      {question.type === 'input' && (
         <input
-          {...register(`questions.${index}.correctAnswer`)}
+          type="text"
+          className="w-full p-2 border"
           placeholder="Correct answer"
-          className="w-full border px-2 py-1"
+          value={question.correctAnswer as string}
+          onChange={e => handleField('correctAnswer', e.target.value)}
         />
       )}
 
-      <button type="button" onClick={() => remove(index)} className="text-red-600 mt-2">
-        ❌ Remove Question
+      <button className="text-red-500 mt-2" onClick={() => onRemove(index)}>
+        Remove
       </button>
     </div>
-  );
-};
+  )
+}
+
+export default QuestionForm
